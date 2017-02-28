@@ -1,32 +1,31 @@
 package cpuinfo
 
 import (
-	// "strconv"
-
 	"github.com/emicklei/go-restful"
+    cgl_cpuinfo "cgolib/cpuinfo"
 )
 
-// GET http://localhost:8081/cpuinfo
-//
 
+// FIXME(Shaohe Feng), Maybe we need a midleware layer here, to translate
+// the pqos data to API data. Maybe we do not need to expose all fields of
+// cpuinfo from pqos.
 type Cpuinfo struct {
-	Id string
+
 }
 
 type CpuinfoResource struct {
-	// normally one would use DAO (data access object)
-	info map[string]Cpuinfo
+
 }
 
 func (cpuinfo CpuinfoResource) Register(container *restful.Container) {
 	ws := new(restful.WebService)
-    // FIXME Now, here is hard code for v1, need refactor.
+    // FIXME(Shaohe Feng)  here is hard code for v1, need refactor.
 	ws.
 		Path("/v1").
 		Doc("Show the cupinfo of a host.").
-        // FIXME just need to support json.
-		Consumes(restful.MIME_XML, restful.MIME_JSON).
-		Produces(restful.MIME_JSON, restful.MIME_XML) // you can specify this per route as well
+        // FIXME(Shaohe Feng) just need to support json.
+		Consumes(restful.MIME_JSON).
+		Produces(restful.MIME_JSON) // you can specify this per route as well
 
 	ws.Route(ws.GET("/cpuinfo").To(cpuinfo.getCpuinfo).
 		// docs
@@ -37,13 +36,11 @@ func (cpuinfo CpuinfoResource) Register(container *restful.Container) {
 	container.Add(ws)
 }
 
-// GET http://localhost:8081/cpuinfo/1
-//
-func (cpuinfo CpuinfoResource) getCpuinfo(request *restful.Request, response *restful.Response) {
-    res := make(map[string]Cpuinfo)
-	info := new(Cpuinfo)
-	info.Id = "1"
-    res["socket"] = *info
-	response.WriteEntity(res)
-}
 
+// FIXME(Shaohe Feng) localhost:8081
+// GET http://localhost:8081/v1/cpuinfo
+func (cpuinfo CpuinfoResource) getCpuinfo(request *restful.Request,
+                                          response *restful.Response) {
+    pq, _ := cgl_cpuinfo.GetCpuInfo()
+	response.WriteEntity(pq)
+}
